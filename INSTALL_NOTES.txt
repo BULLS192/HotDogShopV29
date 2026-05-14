@@ -1,0 +1,24 @@
+V28.7 — Player DB / Stats Manager
+
+Base:
+- V28.6 Step 7 Series Directory Fix
+
+Added:
+- Manage Player DB panel.
+- Editable player names and stats.
+- Delete player.
+- Merge duplicate players.
+- Save Player DB to Firebase.
+- debugPlayerDatabaseSummary() console helper.
+
+Suggested workflow:
+1. Refresh Player DB from Firebase.
+2. Go to Manage Player DB.
+3. Edit/merge duplicates.
+4. Save Player Changes Locally.
+5. Save Player DB to Firebase.
+6. Run debugPlayerDatabaseSummary() in console to check duplicates.
+
+Important:
+- Replace all files.
+- Hard refresh with Ctrl + Shift + R.

@@ -1,0 +1,3 @@
+Camarillo Darts Tournament Manager - V27 regenerated package
+Seeded Double Elimination Logic Integration
+Fresh download package.

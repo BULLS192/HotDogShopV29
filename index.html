@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Darts Tournament Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- PWA manifest hook (safe even if unused) -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- iOS full-screen support -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="apple-mobile-web-app-title" content="DartsTournament" />
+  <link rel="apple-touch-icon" href="icon-512.png" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Darts Tournament Manager</h1>
+      <p>
+        Step 1: Players → Step 2: Teams → Step 3: Brackets & Boards →
+        Step 4: Mystery Out → Step 5: Big Hits → Step 6: Payouts
+      </p>
+    </div>
+    <button id="toggle-display-mode-btn">Toggle Display Mode</button>
+  </header>
+
+  <!-- TOURNAMENT INFO -->
+  <section id="tournament-info-section">
+    <h2>Tournament Info</h2>
+    <div class="form-row">
+      <label>Date:
+        <input type="date" id="tournament-date" />
+      </label>
+      <label>Time:
+        <input type="time" id="tournament-time" />
+      </label>
+      <button id="tournament-datetime-now-btn" type="button">
+        Set to Now
+      </button>
+    </div>
+    <div class="form-row">
+      <label>Location:
+        <select id="tournament-location">
+          <option value="">Select…</option>
+          <option value="JB's Pub & Grill">JB's Pub & Grill</option>
+          <option value="JJ's Bar">JJ's Bar</option>
+          <option value="Hot Dog Shop">Hot Dog Shop</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <!-- SUMMARY BAR (ABOVE STEP 1) -->
+  <section id="summary-section">
+    <div class="summary-bar">
+      <div class="summary-item">
+        <div class="summary-label">Players</div>
+        <div class="summary-value" id="summary-players-total">0</div>
+        <div class="summary-sub">
+          <span id="summary-players-paid">0</span> paid /
+          <span id="summary-players-unpaid">0</span> unpaid
+        </div>
+        <div class="summary-sub">$<span id="summary-paid-total">0.00</span> collected</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Teams</div>
+        <div class="summary-value" id="summary-teams-total">0</div>
+        <div class="summary-sub">2 players per team</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Round 1 Matches</div>
+        <div class="summary-value" id="summary-matches-total">0</div>
+        <div class="summary-sub">Winner bracket only</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 1: PLAYERS -->
+  <section id="players-section">
+    <h2>Step 1 – Players</h2>
+    <form id="player-form">
+      <div class="form-row">
+        <label>First name:
+          <input type="text" id="firstName" required />
+        </label>
+        <label>Last name:
+          <input type="text" id="lastName" placeholder="Optional" />
+        </label>
+        <label>Nickname:
+          <input type="text" id="nickname" placeholder='Optional, e.g. "BULLS"' />
+        </label>
+        <label>Gender:
+          <select id="gender" required>
+            <option value="">Select…</option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+            <option value="O">Other</option>
+          </select>
+        </label>
+        <button type="submit">Add Player</button>
+      </div>
+    </form>
+
+    <div class="form-row">
+      <button id="load-saved-players-btn">Load Saved Players</button>
+      <button id="refresh-player-db-firebase-btn" type="button">Refresh Player DB from Firebase</button>
+      <label>Player DB:
+        <select id="player-db-select"></select>
+      </label>
+      <button id="add-selected-player-db-btn" type="button">Add Selected Player to Tonight</button>
+      <button id="clear-saved-players-btn" class="danger">
+        Clear Saved Player DB
+      </button>
+    </div>
+    <p class="note">
+      The Saved Players DB is a simple local database of names, so you don't have
+      to retype them for every tournament.
+    </p>
+
+    <h3>Registered Players</h3>
+    <table id="players-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Display Name</th>
+          <th>Gender</th>
+          <th>Paid?</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <p class="note"><strong>Running paid total:</strong> <span id="players-paid-running-total">$0.00</span></p>
+  </section>
+
+  <!-- PLAYER STATS (ACROSS TOURNAMENTS) -->
+  <section id="player-stats-section">
+    <h2>Player Stats (from Saved Player DB)</h2>
+    <div class="form-row">
+      <label>Select Player:
+        <select id="statsPlayerSelect"></select>
+      </label>
+      <button id="refresh-stats-btn" type="button">Refresh Stats</button>
+      <button id="edit-player-stats-btn" type="button">Edit Selected Stats</button>
+      <button id="clear-player-stats-btn" type="button" class="danger">Clear Selected Stats</button>
+    </div>
+    <div id="player-stats-display" class="stats-panel">
+      No stats yet.
+    </div>
+    <p class="note">
+      Stats are aggregated across tournaments when you click
+      <strong>"Save Current Tournament"</strong>. Includes games, wins/losses,
+      locations, partners, and Mystery Out numbers.
+    </p>
+  </section>
+
+
+  <!-- MANAGE PLAYER DATABASE -->
+  <section id="manage-player-db-section">
+    <h2>Manage Player DB</h2>
+    <p class="note">
+      Edit saved player names and stats here. Use this to clean up duplicate players and correct historical stats before saving to Firebase.
+    </p>
+
+    <div class="form-row">
+      <label>Select Player:
+        <select id="managePlayerSelect"></select>
+      </label>
+      <button id="manage-refresh-btn" type="button">Refresh List</button>
+      <button id="manage-load-firebase-btn" type="button">Refresh Player DB from Firebase</button>
+      <button id="manage-save-firebase-btn" type="button">Save Player DB to Firebase</button>
+    </div>
+
+    <div class="manager-grid">
+      <label>First Name
+        <input id="manageFirstName" type="text" />
+      </label>
+      <label>Last Name
+        <input id="manageLastName" type="text" />
+      </label>
+      <label>Nickname
+        <input id="manageNickname" type="text" />
+      </label>
+      <label>Gender
+        <select id="manageGender">
+          <option value="">--</option>
+          <option value="M">M</option>
+          <option value="F">F</option>
+          <option value="O">O</option>
+        </select>
+      </label>
+      <label>Tournaments
+        <input id="manageTournaments" type="number" min="0" step="1" />
+      </label>
+      <label>Games
+        <input id="manageGames" type="number" min="0" step="1" />
+      </label>
+      <label>Wins
+        <input id="manageWins" type="number" min="0" step="1" />
+      </label>
+      <label>Losses
+        <input id="manageLosses" type="number" min="0" step="1" />
+      </label>
+      <label>Locations JSON
+        <textarea id="manageLocations" rows="4" placeholder='{"Hot Dog Shop": 3}'></textarea>
+      </label>
+      <label>Partners JSON
+        <textarea id="managePartners" rows="4" placeholder='{"DEREK": 2}'></textarea>
+      </label>
+      <label>Mystery Outs JSON
+        <textarea id="manageMysteryOuts" rows="4" placeholder='{"33": 1}'></textarea>
+      </label>
+    </div>
+
+    <div class="form-row">
+      <button id="manage-save-local-btn" type="button">Save Player Changes Locally</button>
+      <button id="manage-delete-btn" type="button" class="danger">Delete Player</button>
+    </div>
+
+    <h3>Merge Duplicate Players</h3>
+    <p class="note">
+      Merge Source into Target. Stats are added together. Weekly series references and current tournament references are remapped to the target player.
+    </p>
+    <div class="form-row">
+      <label>Target / Keep:
+        <select id="mergeTargetPlayerSelect"></select>
+      </label>
+      <label>Source / Remove:
+        <select id="mergeSourcePlayerSelect"></select>
+      </label>
+      <button id="merge-players-btn" type="button">Merge Source into Target</button>
+    </div>
+
+    <div id="manage-player-db-status" class="stats-panel">Select a player to edit.</div>
+  </section>
+
+
+  <!-- STEP 2: TEAMS -->
+  <section id="teams-section">
+    <h2>Step 2 – Build Teams</h2>
+
+    <h3>Option A – Blind Draw (Random Teams of 2)</h3>
+    <button id="generate-teams-btn">Generate Teams (2 players per team)</button>
+    <p class="note">This overwrites existing teams and re-randomizes them.</p>
+
+    <h3>Option B – Manual Team Creation</h3>
+    <form id="manual-team-form">
+      <div class="form-row">
+        <label>Player 1:
+          <select id="manualPlayer1"></select>
+        </label>
+        <label>Player 2:
+          <select id="manualPlayer2"></select>
+        </label>
+        <button type="submit">Add Team</button>
+      </div>
+      <p class="note">Manual teams use players not already in another team.</p>
+    </form>
+
+    <h3>Teams</h3>
+    <table id="teams-table">
+      <thead>
+        <tr>
+          <th>Team #</th>
+          <th>Player 1</th>
+          <th>Player 2</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- STEP 3: BRACKETS, BOARDS, FINALS -->
+  <section id="matches-section">
+    <h2>Step 3 – Brackets & Boards</h2>
+    <div class="form-row">
+      <button id="generate-matches-btn">Generate Winner Bracket</button>
+      <button id="reseed-bracket-btn">Reseed Bracket (Randomize)</button>
+    </div>
+
+    <!-- view mode selector -->
+    <div class="form-row">
+      <label>Bracket View:
+        <select id="bracket-view-mode">
+          <option value="classic">Classic (Double-Elim View)</option>
+          <option value="knockout">Knockout (Single Bracket View)</option>
+        </select>
+      </label>
+    </div>
+
+    <p class="note">
+      Click a Round 1 team line to assign a specific team number (manual seeding). Click a match box to select the winner.
+      Assign boards per match via dropdown (Boards 1–20).
+    </p>
+
+    <h3>Winner Bracket – Round 1 Matches</h3>
+    <table id="matches-table">
+      <thead>
+        <tr>
+          <th>Match #</th>
+          <th>Team A</th>
+          <th>Team B</th>
+          <th>Board</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="bracket-zone bracket-zone-winners">
+      <div class="bracket-zone-header">
+        <h3>Winner Bracket</h3>
+        <span class="bracket-zone-badge winner">Winners Side</span>
+      </div>
+      <div id="winners-bracket" class="bracket-container bracket-container-top"></div>
+    </div>
+
+    <div class="bracket-zone-separator"></div>
+
+    <div class="bracket-zone bracket-zone-losers">
+      <div class="bracket-zone-header">
+        <h3>Loser Bracket</h3>
+        <span class="bracket-zone-badge loser">Losers Side</span>
+      </div>
+      <div id="losers-bracket" class="bracket-container bracket-container-bottom"></div>
+    </div>
+
+    <div class="finals-container">
+      <div class="finals-left">
+        <h3>Step 3b – Finals / King Seat</h3>
+        <div class="finals-matches">
+          <button id="finals-match1-btn">Record Finals Match 1</button>
+          <span id="finals-match1-result"></span>
+        </div>
+        <div class="finals-matches">
+          <button id="finals-match2-btn">Record Finals Match 2 (if needed)</button>
+          <span id="finals-match2-result"></span>
+        </div>
+
+        <div id="finals-visual-bracket" class="finals-visual-bracket"></div>
+
+        <div class="finals-summary">
+          <p><strong>King Seat Team:</strong> <span id="king-seat-team">TBD</span></p>
+          <p><strong>Loser Bracket Winner:</strong> <span id="losers-champion-team">TBD</span></p>
+          <p><strong>Champion:</strong> <span id="champion-label">TBD</span></p>
+          <p><strong>Runner-up:</strong> <span id="runnerup-label">TBD</span></p>
+        </div>
+
+        <p class="note" id="finals-summary-note">
+          Finals use king seat rules: the challenger from the loser bracket must beat the king seat team twice.
+        </p>
+      </div>
+
+      <div class="finals-right">
+        <h3>Standings (Positions for All Teams)</h3>
+        <div id="standings-panel"></div>
+
+        <h3>Tournament State</h3>
+        <div class="form-row">
+          <button id="save-tournament-btn" type="button">Save Current Tournament</button>
+          <button id="load-tournament-btn" type="button">Load Saved Tournament</button>
+          <button id="export-full-pdf-btn" type="button">Export Full Tournament PDF</button>
+          <button id="export-full-excel-btn" type="button">Export Full Tournament Excel</button>
+        </div>
+        <p class="note">Saved locally in this browser only. Full tournament export includes players, teams, match log, finals, boards, mystery out, big hits, payouts, and the Hot Dog Shop weekly snapshot.</p>
+
+        <div class="firebase-panel">
+          <h4>Firebase Cloud Sync</h4>
+          <p class="note">This production build is preconfigured for your Firebase project and should connect automatically when the page loads. Keep local save/load as a backup if you want a browser-only copy too.</p>
+          <div class="form-row">
+            <span id="firebase-status" class="firebase-status firebase-status-offline">Connecting to Firebase...</span>
+          </div>
+          <div class="form-row">
+            <button id="firebase-save-tournament-btn" type="button">Save Tournament to Firebase</button>
+            <button id="firebase-load-tournament-btn" type="button">Load Tournament from Firebase</button>
+            <button id="firebase-archive-tournament-btn" type="button">Archive Tournament to Firebase</button>
+          </div>
+          <div class="form-row">
+            <button id="firebase-save-series-btn" type="button">Save Weekly Series to Firebase</button>
+            <button id="firebase-load-series-btn" type="button">Load Weekly Series from Firebase</button>
+          </div>
+          <div class="form-row">
+            <label>Email tournament to:
+              <input type="email" id="email-export-address" placeholder="name@example.com" />
+            </label>
+            <button id="email-tournament-btn" type="button">Open Email Draft</button>
+          </div>
+          <div class="form-row">
+            <button id="firebase-refresh-archives-btn" type="button">Refresh Firebase History</button>
+            <label>Saved week:
+              <select id="firebase-tournament-select">
+                <option value="">Select a saved tournament…</option>
+              </select>
+            </label>
+            <button id="firebase-load-selected-btn" type="button">Load Selected Tournament</button>
+          </div>
+          <div id="firebase-archives-list" class="stats-panel">No archived tournaments loaded yet.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COURT ASSIGNMENTS -->
+  <section id="court-assignment-section">
+    <h2>Court Assignments</h2>
+    <p class="note">
+      Shows all active matches that have a board assigned and no winner yet.
+      This is useful as a quick board assignment screen.
+    </p>
+    <table id="court-assignment-table">
+      <thead>
+        <tr>
+          <th>Board</th>
+          <th>Match</th>
+          <th>Teams</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- STEP 4: MYSTERY OUT -->
+  <section id="mystery-out-section">
+    <h2>Step 4 – Mystery Out (Master Out 1–180)</h2>
+    <div class="section-toolbar">
+      <button id="mystery-fullscreen-btn" type="button">Fullscreen</button>
+      <button id="mystery-open-tab-btn" type="button">Open Display Tab</button>
+
+      <label class="inline-label">
+        <input type="checkbox" id="mystery-show-courts-toggle" />
+        Show court assignments in fullscreen / display tab
+      </label>
+
+      <label class="inline-label">
+        <input type="checkbox" id="mystery-show-others-toggle" checked />
+        Show "Others" column
+      </label>
+
+      <label class="inline-label">
+        Tonight's Mystery Out #:
+        <input type="number" id="mystery-target-number" min="1" max="180" style="width:80px;" />
+      </label>
+      <span id="mystery-target-display" class="note"></span>
+    </div>
+
+    <form id="mystery-out-form">
+      <div class="form-row">
+        <label>Winning player:
+          <select id="mysteryPlayerSelect"></select>
+        </label>
+        <label>Out number (1–180):
+          <input type="number" id="mysteryOutNumber" min="1" max="180" />
+        </label>
+      </div>
+      <button type="submit">Record Mystery Out</button>
+      <p class="note">
+        Click any populated Mystery Out cell to edit, move, or remove entries. Click an empty valid number to add a player right in the table.
+        Numbers with no outs show “No Out”. Only valid Master Out numbers (double/triple/bull finish) are accepted.
+      </p>
+    </form>
+
+    <h3>Mystery Out Board (1–180)</h3>
+    <div id="mystery-out-columns">
+      <div class="mystery-columns">
+        <table class="mystery-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>First Hit</th>
+              <th>Others</th>
+            </tr>
+          </thead>
+          <tbody id="mystery-out-table-1"></tbody>
+        </table>
+
+        <table class="mystery-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>First Hit</th>
+              <th>Others</th>
+            </tr>
+          </thead>
+          <tbody id="mystery-out-table-2"></tbody>
+        </table>
+
+        <table class="mystery-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>First Hit</th>
+              <th>Others</th>
+            </tr>
+          </thead>
+          <tbody id="mystery-out-table-3"></tbody>
+        </table>
+
+        <table class="mystery-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>First Hit</th>
+              <th>Others</th>
+            </tr>
+          </thead>
+          <tbody id="mystery-out-table-4"></tbody>
+        </table>
+
+        <table class="mystery-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>First Hit</th>
+              <th>Others</th>
+            </tr>
+          </thead>
+          <tbody id="mystery-out-table-5"></tbody>
+        </table>
+
+        <table class="mystery-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>First Hit</th>
+              <th>Others</th>
+            </tr>
+          </thead>
+          <tbody id="mystery-out-table-6"></tbody>
+        </table>
+      </div>
+    </div>
+    <p class="note">
+      Numbers with no possible Master Out show “No Out”. Possible but unhit numbers are blank until someone hits them.
+      The chosen number for the night is highlighted. You can hide the "Others" column if you only want to display the
+      first person to hit each number.
+    </p>
+
+    <!-- Optional court assignments under Mystery Out for display/fullscreen -->
+    <div id="mystery-courts-container">
+      <h3>Court Assignments (Display)</h3>
+      <table id="mystery-courts-table">
+        <thead>
+          <tr>
+            <th>Board</th>
+            <th>Match</th>
+            <th>Teams</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- STEP 5: BIG HITS -->
+  <section id="special-shots-section">
+    <h2>Step 5 – Big Hits</h2>
+
+    <form id="feats-form">
+      <div class="form-row">
+        <label>Player:
+          <select id="featPlayerSelect"></select>
+        </label>
+        <label>Big Hit:
+          <select id="featTypeSelect">
+            <option value="">Select…</option>
+            <option value="High-Ton">High-Ton</option>
+            <option value="White Horse">White Horse</option>
+            <option value="9-Mark">9-Mark</option>
+            <option value="Hat-Trick">Hat-Trick</option>
+          </select>
+        </label>
+        <button type="submit">Record Big Hit</button>
+      </div>
+    </form>
+
+    <div id="special-shots-list" class="big-hits-list">
+      No Big Hits recorded yet.
+    </div>
+  </section>
+
+  <!-- STEP 6: PAYOUTS -->
+  <section id="payouts-section">
+    <h2>Step 6 – Payouts</h2>
+
+    <div class="payouts-grid">
+      <div class="payouts-left">
+        <h3>Buy-in, Honey Pot & Mystery Out Pot</h3>
+        <div class="form-row">
+          <label>Buy-in per player ($):
+            <input type="number" id="buy-in" min="0" step="0.01" value="10" />
+          </label>
+          <label>Honey Pot: min # female players:
+            <input type="number" id="honey-pot-threshold" min="1" value="3" />
+          </label>
+        </div>
+        <div class="form-row">
+          <label>Mystery Out per player ($):
+            <input type="number" id="mo-per-player" min="0" step="0.01" value="2" />
+          </label>
+          <label>Mystery Out total override ($):
+            <input type="number" id="mo-total-override" min="0" step="0.01" />
+          </label>
+          <label>
+            <input type="checkbox" id="bar-match-pot" />
+            Bar matches player pot
+          </label>
+          <label>
+            <input type="checkbox" id="mo-bar-match" />
+            Bar matches Mystery Out pot
+          </label>
+        </div>
+        <p class="note">
+          Mystery Out is taken out of each player's entry fee. Example: 12 players × $10 entry with $2 Mystery Out per player = $120 player pot and $24 base Mystery Out. If the bar matches the main pot, the total pot becomes $240. If the bar also matches the Mystery Out pot, the total Mystery Out becomes $48 and the remaining tournament payout pool is $240 − $48 = $192.
+        </p>
+
+        <h3>Percentage Split (of tournament prize pool after Honey Pot and total Mystery Out)</h3>
+        <p class="note">
+          These percentages apply only to the tournament prize pool. Mystery Out is calculated separately from the per-player Mystery Out value above, and both the player-funded and bar-matched Mystery Out amounts are removed from the payout pool.
+        </p>
+        <div class="payouts-percents-grid">
+          <label>1st %
+            <input type="number" id="first-percent" value="50" />
+          </label>
+          <label>2nd %
+            <input type="number" id="second-percent" value="30" />
+          </label>
+          <label>3rd %
+            <input type="number" id="third-percent" value="20" />
+          </label>
+          <label>4th %
+            <input type="number" id="fourth-percent" value="0" />
+          </label>
+          <label>5th %
+            <input type="number" id="fifth-percent" value="0" />
+          </label>
+          <label>6th %
+            <input type="number" id="sixth-percent" value="0" />
+          </label>
+          <label>Team Out %
+            <input type="number" id="teamout-percent" value="0" />
+          </label>
+        </div>
+
+        <h3>Optional Fixed Payout Amounts ($)</h3>
+        <p class="note">
+          If you enter a value here, it overrides the percentage-based amount for that position. Use Suggested Even Payouts to round payouts into easy whole numbers that split cleanly between two players.
+        </p>
+        <div class="payouts-percents-grid">
+          <label>1st $
+            <input type="number" id="first-amount-input" min="0" step="0.01" />
+          </label>
+          <label>2nd $
+            <input type="number" id="second-amount-input" min="0" step="0.01" />
+          </label>
+          <label>3rd $
+            <input type="number" id="third-amount-input" min="0" step="0.01" />
+          </label>
+          <label>4th $
+            <input type="number" id="fourth-amount-input" min="0" step="0.01" />
+          </label>
+          <label>5th $
+            <input type="number" id="fifth-amount-input" min="0" step="0.01" />
+          </label>
+          <label>6th $
+            <input type="number" id="sixth-amount-input" min="0" step="0.01" />
+          </label>
+          <label>Team Out $
+            <input type="number" id="teamout-amount-input" min="0" step="0.01" />
+          </label>
+          <label>
+            <input type="checkbox" id="teamout-active" />
+            Team Out active
+          </label>
+        </div>
+
+        <div class="form-row">
+          <button id="calculate-payouts-btn" type="button">Calculate Payouts</button>
+          <button id="suggest-payouts-btn" type="button">Suggested Even Payouts</button>
+        </div>
+      </div>
+
+      <div class="payouts-middle">
+        <h3>Pot Totals</h3>
+        <p><strong>Player Pot:</strong> <span id="player-pot">$0.00</span></p>
+        <p><strong>Bar Pot Match:</strong> <span id="bar-pot-match-amount">$0.00</span></p>
+        <p><strong>Total Pot:</strong> <span id="total-pot">$0.00</span></p>
+        <p><strong>Honey Pot:</strong> <span id="honey-pot-amount">$0.00</span></p>
+        <p><strong>Mystery Out Base:</strong> <span id="mo-base-amount">$0.00</span></p>
+        <p><strong>Mystery Out Match:</strong> <span id="mo-match-amount">$0.00</span></p>
+        <p><strong>Total Mystery Out Pot:</strong> <span id="mo-amount">$0.00</span></p>
+        <p><strong>Tournament Prize Pool:</strong> <span id="tournament-prize-pool">$0.00</span></p>
+      </div>
+
+      <div class="payouts-right">
+        <h3>Payout by Position</h3>
+        <ul class="payouts-list">
+          <li><strong>1st:</strong> <span id="first-amount">$0.00</span>
+            <div id="payout-champion" class="payout-team">TBD</div>
+          </li>
+          <li><strong>2nd:</strong> <span id="second-amount">$0.00</span>
+            <div id="payout-second" class="payout-team">TBD</div>
+          </li>
+          <li><strong>3rd:</strong> <span id="third-amount">$0.00</span>
+            <div id="payout-third" class="payout-team">TBD</div>
+          </li>
+          <li><strong>4th:</strong> <span id="fourth-amount">$0.00</span>
+            <div id="payout-fourth" class="payout-team">TBD</div>
+          </li>
+          <li><strong>5th:</strong> <span id="fifth-amount">$0.00</span>
+            <div id="payout-fifth" class="payout-team">TBD</div>
+          </li>
+          <li><strong>6th:</strong> <span id="sixth-amount">$0.00</span>
+            <div id="payout-sixth" class="payout-team">TBD</div>
+          </li>
+          <li><strong>Team Out:</strong> <span id="teamout-amount">$0.00</span>
+            <div id="payout-teamout" class="payout-team">Not active</div>
+          </li>
+        </ul>
+        <p class="note" id="payouts-info"></p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- STEP 7: HOT DOG SHOP WEEKLY SERIES -->
+  <section id="weekly-series-section">
+    <h2>Step 7 – Hot Dog Shop Weekly Series</h2>
+    <p class="note">
+      Wednesday blind draw season. Points: 1st = 10, 2nd = 7, 3rd = 5, 4th = 3, all other players = 1.
+      Best 6 weeks count. Players must play at least 8 weeks to be eligible.
+      Season dates run from April 8, 2026 through July 1, 2026.
+    </p>
+
+    <div class="form-row">
+      <label>Week:
+        <select id="series-week-select"></select>
+      </label>
+      <button id="series-load-week-btn" type="button">Load Week</button>
+      <button id="series-save-week-btn" type="button">Save Week Results</button>
+      <button id="series-auto-fill-btn" type="button">Auto-Fill from Current Tournament</button>
+      <button id="series-clear-week-btn" type="button" class="danger">Clear Week</button>
+    </div>
+
+    <div class="series-placements-grid">
+      <div class="series-place-card">
+        <h3>1st Place – 10 pts</h3>
+        <div class="series-pair">
+          <select id="series-place-1-a"></select>
+          <select id="series-place-1-b"></select>
+        </div>
+      </div>
+      <div class="series-place-card">
+        <h3>2nd Place – 7 pts</h3>
+        <div class="series-pair">
+          <select id="series-place-2-a"></select>
+          <select id="series-place-2-b"></select>
+        </div>
+      </div>
+      <div class="series-place-card">
+        <h3>3rd Place – 5 pts</h3>
+        <div class="series-pair">
+          <select id="series-place-3-a"></select>
+          <select id="series-place-3-b"></select>
+        </div>
+      </div>
+      <div class="series-place-card">
+        <h3>4th Place – 3 pts</h3>
+        <div class="series-pair">
+          <select id="series-place-4-a"></select>
+          <select id="series-place-4-b"></select>
+        </div>
+      </div>
+    </div>
+
+    <h3>All Other Players – 1 pt each</h3>
+    <div id="series-others-container" class="series-others-grid"></div>
+
+    <div class="series-dashboard-grid">
+      <div class="series-card">
+        <h3>Season Leaderboard</h3>
+        <div id="series-dashboard-overall">No season data yet.</div>
+      </div>
+      <div class="series-card">
+        <h3>Top 16 View</h3>
+        <div id="series-top16-view">No qualified players yet.</div>
+      </div>
+      <div class="series-card">
+        <h3>Wildcard Draw Pool</h3>
+        <div class="form-row">
+          <button id="series-draw-wildcards-btn" type="button">Draw 4 Wildcards</button>
+        </div>
+        <div id="series-wildcard-pool-view">No wildcard pool yet.</div>
+      </div>
+      <div class="series-card">
+        <h3>Final Qualifier Bracket Generator</h3>
+        <div class="form-row">
+          <button id="series-generate-qualifier-btn" type="button">Generate Qualifier Bracket</button>
+        </div>
+        <div id="series-qualifier-view">No qualifier bracket generated yet.</div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <button id="series-current-week-pdf-btn" type="button">Save Current Week PDF</button>
+      <button id="series-current-week-excel-btn" type="button">Export Current Week Excel</button>
+      <button id="series-export-csv-btn" type="button">Export Leaderboard CSV</button>
+      <button id="series-export-excel-btn" type="button">Export Leaderboard Excel</button>
+      <button id="finalize-tournament-btn">Finalize Tournament</button>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      DartsTournament – Players, Teams, Double-Elim Brackets (with boards),
+      King Seat Finals, Mystery Out, Big Hits, Payouts, Save/Load, Court Assignments,
+      Tournament Info, Player Stats, and Hot Dog Shop Weekly Series.
+    </p>
+
+    
+  </footer>
+<footer id="site-footer">
+  <div class="footer-inner">
+    <p>
+      © 2025 Omnidite Advisory LLC. All rights reserved.  
+      Camarillo Darts™ is a trademark of Omnidite Advisory LLC.
+    </p>
+    <p>
+      <a href="terms.html" target="_blank">Terms of Use</a> ·
+      <a href="privacy.html" target="_blank">Privacy Policy</a> ·
+      <a href="disclaimer.html" target="_blank">Legal Disclaimer</a>
+    </p>
+  </div>
+</footer>
+
+  <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
