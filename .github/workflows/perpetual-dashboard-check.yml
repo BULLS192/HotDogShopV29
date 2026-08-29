@@ -1,0 +1,28 @@
+name: Perpetual dashboard check
+
+on:
+  push:
+    paths:
+      - 'perpetual/**'
+      - '.github/workflows/perpetual-dashboard-check.yml'
+  pull_request:
+    paths:
+      - 'perpetual/**'
+      - '.github/workflows/perpetual-dashboard-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  syntax-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check perpetual dashboard JavaScript syntax
+        run: node --check perpetual/app.js
