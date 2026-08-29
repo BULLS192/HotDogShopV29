@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hot Dog Shop — Perpetual Standings</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <p class="eyebrow">Camarillo Darts · Hot Dog Shop</p>
+      <h1>Perpetual Weekly Standings</h1>
+      <p class="subtitle">A read-only rebuild that recomputes results from Firebase tournament history, previews safe player deduplication, and prepares the data model for a future Nexus handoff.</p>
+    </div>
+    <div class="hero-actions">
+      <button id="refresh-btn" type="button">Refresh Live Data</button>
+      <button id="export-raw-btn" type="button" class="secondary" disabled>Export Raw Firebase Backup</button>
+      <button id="export-clean-btn" type="button" class="secondary" disabled>Export Clean Preview</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="notice">
+      <strong>Read-only migration preview.</strong>
+      This page does not delete, merge, or overwrite Firebase data. The original V29 tournament manager remains unchanged at the repository root.
+    </section>
+
+    <section class="status-card">
+      <div>
+        <span id="status-dot" class="dot pending"></span>
+        <strong id="status-text">Connecting to Firebase…</strong>
+      </div>
+      <div id="status-detail" class="muted"></div>
+    </section>
+
+    <section class="metrics" aria-label="Data summary">
+      <article><span class="metric-label">Weekly Events</span><strong id="metric-events">—</strong><small id="metric-event-range">—</small></article>
+      <article><span class="metric-label">Raw Player Records</span><strong id="metric-raw-players">—</strong><small>Firebase + event identities</small></article>
+      <article><span class="metric-label">Clean Players</span><strong id="metric-clean-players">—</strong><small>Conservative exact-identity preview</small></article>
+      <article><span class="metric-label">Duplicate Groups</span><strong id="metric-duplicates">—</strong><small>Needs review before any write</small></article>
+      <article><span class="metric-label">Latest Tournament</span><strong id="metric-latest">—</strong><small id="metric-latest-location">—</small></article>
+    </section>
+
+    <section>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Current view</p>
+          <h2>Standings</h2>
+        </div>
+        <div class="segmented" role="group" aria-label="Standings window">
+          <button class="standings-mode active" data-mode="all">All Time</button>
+          <button class="standings-mode" data-mode="year">2026</button>
+          <button class="standings-mode" data-mode="rolling12">Rolling 12</button>
+        </div>
+      </div>
+      <p class="muted">Points preserve the original weekly scoring: 1st 10 · 2nd 7 · 3rd 5 · 4th 3 · all other participants 1. Unlike the old finite championship, this table does not stop after a fixed number of weeks.</p>
+      <div class="table-wrap">
+        <table id="standings-table">
+          <thead>
+            <tr><th>#</th><th>Player</th><th>Points</th><th>Played</th><th>Wins</th><th>Podiums</th><th>Pts / Entry</th><th>Last Played</th></tr>
+          </thead>
+          <tbody><tr><td colspan="8" class="empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Data quality</p>
+          <h2>Duplicate Review</h2>
+        </div>
+      </div>
+      <p class="muted">“Exact duplicate” means normalized first name, last name, nickname, and gender match but multiple persistent IDs exist. “Possible duplicate” is broader and is never auto-collapsed.</p>
+      <div class="table-wrap">
+        <table id="duplicate-table">
+          <thead><tr><th>Confidence</th><th>Player</th><th>Persistent IDs</th><th>Seen In Events</th><th>Reason</th></tr></thead>
+          <tbody><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="two-col">
+      <article class="panel">
+        <p class="eyebrow">Migration</p>
+        <h2>Nexus-ready shape</h2>
+        <p>The clean export keeps source IDs and history while introducing a canonical player key. A later Nexus migration can attach a <code>nexusPlayerId</code> without rewriting old tournament records.</p>
+        <ul>
+          <li><strong>players</strong>: canonical identity + source IDs</li>
+          <li><strong>events</strong>: one record per weekly tournament</li>
+          <li><strong>results</strong>: event, player, placement, points</li>
+          <li><strong>source</strong>: <code>hotdogshop-v29</code> retained for lineage</li>
+        </ul>
+      </article>
+      <article class="panel">
+        <p class="eyebrow">Safety</p>
+        <h2>What this version deliberately avoids</h2>
+        <p>No player merges are written back to Firestore. No historical document is deleted. No V29 code path is modified. Cleanup should only be applied after the raw Firebase export has been downloaded and duplicate groups have been reviewed.</p>
+      </article>
+    </section>
+
+    <section>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">History</p>
+          <h2>Weekly Tournament Timeline</h2>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="events-table">
+          <thead><tr><th>Date</th><th>Location</th><th>Players</th><th>Teams</th><th>Champion</th><th>Runner-up</th><th>Source Document</th></tr></thead>
+          <tbody><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Hot Dog Shop perpetual migration preview</span>
+    <a href="../">Open original V29 tournament manager</a>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
+  <script src="../firebase-config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
