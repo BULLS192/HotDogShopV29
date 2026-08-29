@@ -25,4 +25,7 @@ jobs:
         with:
           node-version: '22'
       - name: Check perpetual dashboard JavaScript syntax
-        run: node --check perpetual/app.js
+        run: |
+          node --check perpetual/app.js
+          node --check perpetual/cleanup-rules.js
+          node --check perpetual/firestore-rest-audit.mjs
