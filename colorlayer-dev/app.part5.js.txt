@@ -1,0 +1,2 @@
+els.resetBtn.onclick=()=>{state={sourceImage:null,sourceDataUrl:null,filenameBase:'artwork',w:0,h:0,indices:null,palette:[],backgroundIndex:null};els.fileInput.value='';for(const c of[els.sourceCanvas,els.quantCanvas]){c.width=300;c.height=200;c.getContext('2d').clearRect(0,0,300,200)}els.processBtn.disabled=true;els.exportProjectBtn.disabled=true;els.saveProjectBtn.disabled=true;els.status.textContent='Load an image to begin.';renderEmpty();updateDimensionLine()};
+updateDimensionLine();

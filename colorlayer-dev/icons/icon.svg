@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0d0f12"/>
+  <rect x="60" y="60" width="392" height="392" rx="78" fill="#171a1f" stroke="#6fd3ff" stroke-width="14"/>
+  <rect x="122" y="118" width="198" height="198" rx="18" fill="none" stroke="#6fd3ff" stroke-width="18"/>
+  <rect x="158" y="154" width="198" height="198" rx="18" fill="none" stroke="#b2f56f" stroke-width="18"/>
+  <rect x="194" y="190" width="198" height="198" rx="18" fill="none" stroke="#f2d17a" stroke-width="18"/>
+  <text x="256" y="424" text-anchor="middle" font-family="Arial,sans-serif" font-size="74" font-weight="700" fill="#ffffff">CL</text>
+</svg>

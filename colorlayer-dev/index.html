@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ColorLayer V0.3.1 — Artwork to Manufacturing Layers</title>
+  <meta name="theme-color" content="#0d0f12" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ColorLayer" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/icon.svg" />
+  <link rel="icon" href="icons/icon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="brand">ColorLayer <span>V0.3.1</span> <span id="channelBadge" class="channel-badge">LIVE</span></div>
+      <div class="subtitle">Artwork → editable flat colors → vector / CAD-ready manufacturing files</div>
+    </div>
+    <div class="header-actions"><span id="networkBadge" class="network-badge">Online</span>
+      <button id="saveProjectBtn" class="ghost" disabled>Save project</button>
+      <label class="ghost file-button">Open project<input id="openProjectInput" type="file" accept="application/json,.json" hidden></label>
+      <button id="resetBtn" class="ghost">Reset</button>
+    </div>
+  </header>
+
+  <main class="app">
+    <aside class="panel controls">
+      <h2>Artwork</h2>
+      <label id="dropzone" class="dropzone">
+        <input id="fileInput" type="file" accept="image/*" hidden />
+        <span class="drop-title">Drop artwork here</span>
+        <span class="drop-sub">PNG · JPG · WEBP · GIF first frame</span>
+      </label>
+
+      <div class="control">
+        <label for="colorCount">Target colors <b id="colorCountValue">6</b></label>
+        <input id="colorCount" type="range" min="2" max="16" value="6" />
+      </div>
+      <div class="control">
+        <label for="simplify">Pre-smoothing <b id="simplifyValue">2 px</b></label>
+        <input id="simplify" type="range" min="0" max="8" value="2" />
+      </div>
+      <div class="control">
+        <label for="minIsland">Remove islands smaller than <b id="minIslandValue">12 px</b></label>
+        <input id="minIsland" type="range" min="0" max="250" value="12" />
+      </div>
+      <button id="processBtn" class="primary" disabled>Decompose artwork</button>
+
+      <hr>
+      <h2>Manufacturing</h2>
+      <div class="grid2">
+        <label>Width (mm)<input id="widthMm" type="number" min="10" step="1" value="200"></label>
+        <label>Layer (mm)<input id="layerMm" type="number" min="0.05" step="0.05" value="0.6"></label>
+        <label>Backing (mm)<input id="backingMm" type="number" min="0.2" step="0.1" value="2.0"></label>
+        <label>Frame (mm)<input id="frameMm" type="number" min="0" step="0.5" value="8"></label>
+      </div>
+      <div class="control">
+        <label for="vectorTolerance">Vector simplification <b id="vectorToleranceValue">1.2 px</b></label>
+        <input id="vectorTolerance" type="range" min="0" max="5" step="0.1" value="1.2" />
+      </div>
+      <label class="check"><input id="excludeBackground" type="checkbox" checked> Exclude background layer from exports</label>
+      <label class="check"><input id="transparentBg" type="checkbox" checked> Transparent PNG backgrounds</label>
+
+      <div class="control boxed">
+        <div class="control-title">Alignment / registration</div>
+        <select id="registrationMode">
+          <option value="none">None</option>
+          <option value="two">2 corner markers</option>
+          <option value="four">4 corner markers</option>
+        </select>
+        <div class="grid2 compact">
+          <label>Diameter<input id="pinDiameter" type="number" min="1" step="0.1" value="3"></label>
+          <label>Margin<input id="pinMargin" type="number" min="1" step="0.5" value="6"></label>
+        </div>
+        <small>Markers are included in SVG/DXF and the backing STL. Layer STL holes are experimental because isolated color islands may not physically reach the markers.</small>
+      </div>
+
+      <button id="exportProjectBtn" class="secondary" disabled>Export manufacturing ZIP</button>
+      <div class="note">Everything runs locally in your browser. No artwork is uploaded.</div>
+    </aside>
+
+    <section class="workspace">
+      <section class="panel">
+        <div class="section-head">
+          <h2>Preview</h2>
+          <div id="status" class="status">Load an image to begin.</div>
+        </div>
+        <div class="preview-grid">
+          <div><h3>Original</h3><canvas id="sourceCanvas"></canvas></div>
+          <div><h3>Flattened / edited</h3><canvas id="quantCanvas"></canvas></div>
+        </div>
+        <div class="dimension-line" id="dimensionLine">—</div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <div>
+            <h2>Palette editor</h2>
+            <div class="subcopy">Change colors, name filament, choose background, hide, or merge layers without reprocessing the artwork.</div>
+          </div>
+          <span id="layerCountBadge" class="badge">0 layers</span>
+        </div>
+        <div id="paletteEditor" class="palette-editor empty">Decompose an image to edit its palette.</div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <div>
+            <h2>Color layers</h2>
+            <div class="subcopy">Each layer can be downloaded independently as PNG, contour SVG, DXF, or experimental STL.</div>
+          </div>
+        </div>
+        <div id="layers" class="layers empty">Individual color files will appear here.</div>
+      </section>
+    </section>
+  </main>
+
+  <footer>ColorLayer V0.3.1 · installable PWA · local-first · vector contours + manufacturing export</footer>
+  <div id="updateToast" class="update-toast" hidden><span>A newer ColorLayer build is ready.</span><button id="reloadAppBtn">Reload</button></div>
+  <script src="loader.js"></script>
+  <script src="pwa.js"></script>
+</body>
+</html>
