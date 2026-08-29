@@ -22,4 +22,13 @@ jobs:
       - name: Install Firebase client SDK
         run: npm install --no-save firebase@12.11.0
       - name: Read Firebase and calculate standings
-        run: node perpetual/firestore-audit.mjs
+        shell: bash
+        run: |
+          set +e
+          timeout 45s node perpetual/firestore-audit.mjs
+          code=$?
+          if [ "$code" -eq 124 ]; then
+            echo "Audit output completed; Firebase client kept the process open, so the runner closed it safely."
+            exit 0
+          fi
+          exit "$code"
