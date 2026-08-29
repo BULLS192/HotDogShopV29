@@ -1,0 +1,25 @@
+name: Perpetual live Firebase audit
+
+on:
+  push:
+    paths:
+      - 'perpetual/firestore-audit.mjs'
+      - '.github/workflows/perpetual-live-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  firebase-read-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Firebase client SDK
+        run: npm install --no-save firebase@12.11.0
+      - name: Read Firebase and calculate standings
+        run: node perpetual/firestore-audit.mjs
