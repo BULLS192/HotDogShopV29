@@ -5,6 +5,8 @@ on:
     paths:
       - 'perpetual/firestore-rest-audit.mjs'
       - 'perpetual/recovery-audit.mjs'
+      - 'perpetual/reconstructed-standings-audit.mjs'
+      - 'perpetual/reconstruction-ledger.json'
       - '.github/workflows/perpetual-live-audit.yml'
   workflow_dispatch:
 
@@ -25,3 +27,5 @@ jobs:
         run: node perpetual/firestore-rest-audit.mjs
       - name: Cross-check archives, series and current state
         run: node perpetual/recovery-audit.mjs
+      - name: Build trusted and expanded reconstructed standings
+        run: node perpetual/reconstructed-standings-audit.mjs
