@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "project": "Hot Dog Shop weekly tournament reconstruction",
+  "sourceSystem": "HotDogShopV29 / Firebase",
+  "policy": {
+    "firebaseIsEvidenceNotAuthority": true,
+    "destructiveWritesAllowed": false,
+    "standingsIncludeStatuses": ["confirmed", "recovered-reviewed"],
+    "standingsExcludeStatuses": ["partial", "missing", "disputed", "cancelled-unverified"]
+  },
+  "events": [
+    {"date":"2026-04-08","status":"confirmed","firebaseTournament":true,"archive":true,"seriesEvidence":true,"storedChampion":"JORGE & DEREK","storedRunnerUp":"JENSEA & CHRIS","notes":"Tournament and archive agree; series evidence exists."},
+    {"date":"2026-04-15","status":"confirmed","firebaseTournamentDate":"2026-04-16","archiveDate":"2026-04-16","seriesEvidence":true,"storedChampion":"JENSEA & DEREK","storedRunnerUp":"LYNDA & RYAN KEY","notes":"Wednesday/Thursday date drift. Treat 2026-04-15 series week and 2026-04-16 saved tournament as one event after review."},
+    {"date":"2026-04-22","status":"confirmed","firebaseTournament":true,"archive":true,"seriesEvidence":true,"storedChampion":"MC & GREG","storedRunnerUp":"DEREK & SAM","notes":"Multiple Firebase sources agree."},
+    {"date":"2026-04-29","status":"confirmed","firebaseTournament":true,"archive":true,"seriesEvidence":true,"storedChampion":"DEREK & JOSH","storedRunnerUp":"BRYCE & MC","notes":"Valid tournament exists. Ignore separate empty 2026-04-29_location save shell."},
+    {"date":"2026-05-06","status":"confirmed","firebaseTournamentDate":"2026-05-07","archiveDate":"2026-05-07","seriesEvidence":true,"storedChampion":"MC & DEREK","storedRunnerUp":"JENSEA & JAIME","notes":"Wednesday/Thursday date drift; sources agree on result."},
+    {"date":"2026-05-13","status":"confirmed","firebaseTournament":true,"archive":true,"seriesEvidence":true,"storedChampion":"JESSICA & DEREK","storedRunnerUp":"JEREMY & JAIME","notes":"Multiple Firebase sources agree."},
+    {"date":"2026-05-20","status":"recovered-pending-review","firebaseTournament":false,"archive":false,"seriesEvidence":true,"storedChampion":null,"recoveredPlacements":{"1":["Jaime","Derek"],"2":["Josh","MC"],"3":["Bryce","Sam"],"4":["Dennis","UNRESOLVED_PLAYER_ID"]},"notes":"Tournament is absent from saved tournament ledger but complete top-four placements exist in seriesSeasons. Must review identities before inclusion."},
+    {"date":"2026-05-27","status":"missing","firebaseTournament":false,"archive":false,"seriesEvidence":false,"notes":"Weekly-cadence candidate. Unknown whether event occurred or was cancelled."},
+    {"date":"2026-06-03","status":"confirmed","firebaseTournamentDate":"2026-06-04","archiveDate":"2026-06-04","seriesEvidence":true,"storedChampion":"Mercedes & DEREK","storedRunnerUp":"Hayley & BRYCE","notes":"Wednesday/Thursday date drift; sources agree."},
+    {"date":"2026-06-11","status":"confirmed","firebaseTournament":true,"archive":true,"seriesEvidence":false,"storedChampion":"JOSH & Derek","storedRunnerUp":"DENNIS & GREG","notes":"Tournament and archive agree."},
+    {"date":"2026-06-17","status":"confirmed","firebaseTournamentDate":"2026-06-18","archiveDate":"2026-06-18","seriesEvidence":true,"storedChampion":"BRYCE & DEREK","storedRunnerUp":"Omar & GREG","notes":"Wednesday/Thursday date drift; sources agree."},
+    {"date":"2026-06-25","status":"partial","firebaseTournament":true,"archive":false,"seriesEvidence":false,"storedChampion":"SLIM & Justin G","storedRunnerUp":"Joel & CORTEZ","notes":"Saved tournament exists, but no archive/series cross-check in current evidence set. Needs review before official standings."},
+    {"date":"2026-07-02","status":"partial","firebaseTournament":true,"archive":false,"seriesEvidence":false,"storedChampion":"MC & Joel","storedRunnerUp":"GREG & Batman","notes":"Saved tournament exists but lacks independent archive/series corroboration."},
+    {"date":"2026-07-09","status":"partial","firebaseTournament":true,"archive":false,"seriesEvidence":false,"storedChampion":"Omar & JOSH","storedRunnerUp":"BRYCE & MC","notes":"Champion/runner-up stored while internal completed flag is false. Needs review."},
+    {"date":"2026-07-16","status":"missing","firebaseTournament":false,"archive":false,"seriesEvidence":false,"notes":"Weekly-cadence candidate. Unknown whether event occurred or was cancelled."},
+    {"date":"2026-07-23","status":"partial","firebaseTournament":true,"archive":false,"seriesEvidence":false,"storedChampion":"JOSH & DOSS","storedRunnerUp":"SAM & JENSEA","notes":"Champion/runner-up stored while internal completed flag is false. Needs review."},
+    {"date":"2026-07-30","status":"partial","firebaseTournament":true,"archive":false,"seriesEvidence":false,"storedChampion":"MC & Patrick","storedRunnerUp":"Adam & Joel","notes":"Champion/runner-up stored while internal completed flag is false. Needs review."},
+    {"date":"2026-08-06","status":"partial","firebaseTournament":true,"archive":false,"seriesEvidence":false,"storedChampion":"DEREK & JASON","storedRunnerUp":"GREG & JEFF","notes":"Saved tournament exists but lacks independent archive/series corroboration."},
+    {"date":"2026-08-13","status":"partial","firebaseTournament":true,"archive":false,"seriesEvidence":false,"storedChampion":"Brother James & DEREK","storedRunnerUp":"Cody T & Joel","notes":"Saved tournament exists but lacks independent archive/series corroboration."},
+    {"date":"2026-08-20","status":"missing","firebaseTournament":false,"archive":false,"seriesEvidence":false,"notes":"Weekly-cadence candidate. Unknown whether event occurred or was cancelled."},
+    {"date":"2026-08-27","status":"disputed","firebaseTournament":true,"archive":false,"seriesEvidence":false,"storedChampion":"Logan & SAM","storedRunnerUp":"BRYCE & KEVIN","organizerCorrection":{"claim":"Logan did not win the August 27 tournament.","correctChampion":null,"correctRunnerUp":null,"verificationNeeded":true},"notes":"Firebase result is explicitly contradicted by organizer. Exclude entire event from reconstructed standings until actual finishing order is verified."}
+  ]
+}
