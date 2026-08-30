@@ -4,7 +4,9 @@ on:
   push:
     paths:
       - 'perpetual/firestore-rest-audit.mjs'
+      - 'perpetual/recovery-audit.mjs'
       - '.github/workflows/perpetual-live-audit.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -21,3 +23,5 @@ jobs:
           node-version: '22'
       - name: Read Firestore and calculate standings
         run: node perpetual/firestore-rest-audit.mjs
+      - name: Cross-check archives, series and current state
+        run: node perpetual/recovery-audit.mjs
