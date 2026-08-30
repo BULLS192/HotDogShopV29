@@ -1,0 +1,23 @@
+name: Deep tournament reconstruction audit
+
+on:
+  push:
+    branches: [reconstruction-work]
+    paths:
+      - 'perpetual/deep-reconstruction-audit.mjs'
+      - '.github/workflows/deep-reconstruction-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reconstruct:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reconstruct historical evidence
+        run: node perpetual/deep-reconstruction-audit.mjs
